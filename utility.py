@@ -10,15 +10,25 @@ gauges = {}
 counters = {}
 filesWatched = []
 
+DEBUG = False
+
+def setDebug(value):
+    global DEBUG
+    DEBUG = value
+
+def debug(message):
+    if DEBUG == True:
+        print(message)
+
 def enrichLabels(labelDict):
     if labelDict is None:
         return labelDict
+    if "host" in labelDict:
+        return labelDict
     host=socket.gethostname().lower()
-    ip=socket.gethostbyname(socket.gethostname())
     labelDict.update(
         {
             "host": host,
-            #"ip_address": ip, # This is causing problems in alert expr when it changes, such as a blip and it goes to 127.0.0.1 for a few seconds.
         }
     )
 
@@ -94,6 +104,7 @@ def getCounter(name, description, labelDict):
 def set(name, value, labelDict):
     enrichLabels(labelDict)
     gauge = getGauge(name, "", labelDict.keys())
+    debug("utility.set({}, {}, {})".format(name, value, labelDict))
     if len(labelDict.keys()) > 0:
         if value is not None:
             gauge.labels(*labelDict.values()).set(value)
@@ -106,6 +117,7 @@ def set(name, value, labelDict):
 def add(name, value, labelDict):
     enrichLabels(labelDict)
     gauge = getGauge(name, "", labelDict.keys())
+    debug("utility.add({}, {}, {})".format(name, value, labelDict))
     if len(labelDict.keys()) > 0:
         if value is not None:
             gauge.labels(*labelDict.values()).inc(value)
@@ -117,6 +129,7 @@ def add(name, value, labelDict):
 def inc(name, labelDict):
     enrichLabels(labelDict)
     counter = getCounter(name, "", labelDict.keys())
+    debug("utility.inc({}, {}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
         counter.labels(*labelDict.values()).inc()
     else:
@@ -125,6 +138,7 @@ def inc(name, labelDict):
 def dec(name, labelDict):
     enrichLabels(labelDict)
     counter = getCounter(name, "", labelDict.keys())
+    debug("utility.dec({}, {}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
         counter.labels(*labelDict.values()).dec()
     else:
