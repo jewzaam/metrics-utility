@@ -129,7 +129,7 @@ def add(name, value, labelDict):
 def inc(name, labelDict):
     enrichLabels(labelDict)
     counter = getCounter(name, "", labelDict.keys())
-    debug("utility.inc({}, {}, {})".format(name, labelDict))
+    debug("utility.inc({}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
         counter.labels(*labelDict.values()).inc()
     else:
@@ -138,7 +138,7 @@ def inc(name, labelDict):
 def dec(name, labelDict):
     enrichLabels(labelDict)
     counter = getCounter(name, "", labelDict.keys())
-    debug("utility.dec({}, {}, {})".format(name, labelDict))
+    debug("utility.dec({}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
         counter.labels(*labelDict.values()).dec()
     else:
