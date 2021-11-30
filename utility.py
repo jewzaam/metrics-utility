@@ -12,6 +12,20 @@ filesWatched = []
 
 DEBUG = False
 
+def sorted_keys(data):
+    if data is None or len(data.keys()) == 0:
+        return None
+    return sorted(data)
+
+def sorted_values(data):
+    keys = sorted_keys(data)
+    if keys is None:
+        return None
+    values = []
+    for key in keys:
+        values.append(data[key])
+    return values
+
 def setDebug(value):
     global DEBUG
     DEBUG = value
@@ -103,44 +117,44 @@ def getCounter(name, description, labelDict):
 
 def set(name, value, labelDict):
     enrichLabels(labelDict)
-    gauge = getGauge(name, "", labelDict.keys())
+    gauge = getGauge(name, "", sorted_keys(labelDict))
     debug("utility.set({}, {}, {})".format(name, value, labelDict))
     if len(labelDict.keys()) > 0:
         if value is not None:
-            gauge.labels(*labelDict.values()).set(value)
+            gauge.labels(*sorted_values(labelDict)).set(value)
         else:
-            gauge.remove(*labelDict.values())
+            gauge.remove(*sorted_values(labelDict))
     else:
         # cannot clear value if there is no label, just let the error propogate up
         gauge.set(value)
 
 def add(name, value, labelDict):
     enrichLabels(labelDict)
-    gauge = getGauge(name, "", labelDict.keys())
+    gauge = getGauge(name, "", sorted_keys(labelDict))
     debug("utility.add({}, {}, {})".format(name, value, labelDict))
     if len(labelDict.keys()) > 0:
         if value is not None:
-            gauge.labels(*labelDict.values()).inc(value)
+            gauge.labels(*sorted_values(labelDict)).inc(value)
         else:
-            gauge.remove(*labelDict.values())
+            gauge.remove(*sorted_values(labelDict))
     else:
         gauge.inc(value)
 
 def inc(name, labelDict):
     enrichLabels(labelDict)
-    counter = getCounter(name, "", labelDict.keys())
+    counter = getCounter(name, "", sorted_keys(labelDict))
     debug("utility.inc({}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
-        counter.labels(*labelDict.values()).inc()
+        counter.labels(*sorted_values(labelDict)).inc()
     else:
         counter.inc()
 
 def dec(name, labelDict):
     enrichLabels(labelDict)
-    counter = getCounter(name, "", labelDict.keys())
+    counter = getCounter(name, "", sorted_keys(labelDict))
     debug("utility.dec({}, {})".format(name, labelDict))
     if len(labelDict.keys()) > 0:
-        counter.labels(*labelDict.values()).dec()
+        counter.labels(*sorted_values(labelDict)).dec()
     else:
         counter.dec()
 
