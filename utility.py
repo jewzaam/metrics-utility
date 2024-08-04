@@ -2,9 +2,11 @@ import time
 import re
 import os
 import socket
-from threading import Thread
+from threading import Thread, Lock
 
 import prometheus_client
+
+mutex = Lock()
 
 gauges = {}
 counters = {}
@@ -101,18 +103,26 @@ def getGauge(name, description, labelDict):
     if name in gauges:
         gauge = gauges[name]
     else:
-        print("Creating Gauge: {}({})".format(name,labelDict))
-        gauge = prometheus_client.Gauge(name, description, labelDict)
-        gauges[name] = gauge
+        with mutex:
+            if name in gauges:
+                gauge = gauges[name]
+            else:
+                print("Creating Gauge: {}({})".format(name,labelDict))
+                gauge = prometheus_client.Gauge(name, description, labelDict)
+                gauges[name] = gauge
     return gauge
 
 def getCounter(name, description, labelDict):
     if name in counters:
         counter = counters[name]
     else:
-        print("Creating Counter: {}".format(name))
-        counter = prometheus_client.Counter(name, description, labelDict)
-        counters[name] = counter
+        with mutex:
+            if name in counters:
+                counter = counters[name]
+            else:
+                print("Creating Counter: {}".format(name))
+                counter = prometheus_client.Counter(name, description, labelDict)
+                counters[name] = counter
     return counter
 
 def set(name, value, labelDict):
