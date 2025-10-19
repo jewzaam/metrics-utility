@@ -8,15 +8,15 @@ import re
 import socket
 import time
 from threading import Lock, Thread
-from typing import Any, Callable, Dict, List  # noqa: F401
+from typing import Any, Callable
 
 import prometheus_client
 
 mutex = Lock()
 
-gauges = {}  # type: Dict[str, Any]
-counters = {}  # type: Dict[str, Any]
-filesWatched = []  # type: List[str]
+gauges = {}  # type: dict[str, Any]
+counters = {}  # type: dict[str, Any]
+filesWatched = []  # type: list[str]
 
 DEBUG = False
 
