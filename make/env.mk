@@ -27,7 +27,6 @@ requirements: venv uv ## Install all dependencies (runtime)
 
 requirements-dev: venv uv requirements ## Install all dev dependencies
 	@$(VENV_UV) pip install -r requirements-dev.txt
-	@$(VENV_UV) pip install -e .
 	@echo "✅ All dev dependencies installed in $(VENV_DIR)"
 
 clean: ## Remove temporary and backup files

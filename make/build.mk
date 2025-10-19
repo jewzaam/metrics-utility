@@ -2,24 +2,9 @@
 # Build and Distribution Targets
 # ================================
 
-.PHONY: build build-wheel build-sdist install-local uninstall
+.PHONY: build build-wheel
 
-build: build-wheel build-sdist ## Build both wheel and source distribution
-
-build-wheel: requirements-dev ## Build wheel distribution for disconnected environments
+build: requirements-dev ## Build wheel distribution
 	@$(VENV_PYTHON) -m build --wheel
-	@printf "$(GREEN)✅ Wheel built in dist/$(RESET)\n"
-	@ls -lh dist/*.whl
-
-build-sdist: requirements-dev ## Build source distribution
-	@$(VENV_PYTHON) -m build --sdist
-	@printf "$(GREEN)✅ Source distribution built in dist/$(RESET)\n"
-
-install-local: build-wheel ## Install from local wheel (for testing)
-	@$(VENV_PIP) install --force-reinstall dist/*.whl
-	@printf "$(GREEN)✅ Package installed from local wheel$(RESET)\n"
-
-uninstall: ## Uninstall the package
-	@$(VENV_PIP) uninstall -y metrics-utility || true
-	@printf "$(GREEN)✅ Package uninstalled$(RESET)\n"
+	@printf "$(GREEN)✅ Wheel built: dist/metrics_utility-$(VERSION)-py3-none-any.whl$(RESET)\n"
 

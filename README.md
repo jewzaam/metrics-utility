@@ -8,6 +8,33 @@
 
 A simple Prometheus metrics utility library for Python. This library provides a clean, Pythonic interface for creating and managing Prometheus metrics with automatic label enrichment and file watching capabilities.
 
+## Quick Start
+
+### Development
+```bash
+git clone https://github.com/jewzaam/metrics-utility
+cd metrics-utility
+make test
+```
+
+### Release
+```bash
+# Update version in pyproject.toml, commit and push
+make release
+```
+
+### Use in Other Projects
+Add to `requirements.txt`:
+```txt
+metrics-utility @ git+https://github.com/jewzaam/metrics-utility.git@v0.1.0
+```
+
+```python
+import metrics_utility
+metrics_utility.metrics(8000)
+metrics_utility.set("my_metric", 42.0, {"env": "prod"})
+```
+
 ## 🚀 Features
 
 - **Simple API**: Easy-to-use functions for gauges and counters
@@ -17,319 +44,39 @@ A simple Prometheus metrics utility library for Python. This library provides a 
 - **Modern Python**: Type hints, proper packaging, and modern tooling
 - **Disconnected Environment Support**: Distribute as wheel files for offline installation
 
-## 📦 Installation
-
-### From PyPI (when published)
+## Make Targets
 
 ```bash
-pip install metrics-utility
+make help      # Show all targets
+make test      # Run tests
+make coverage  # Run tests with coverage report
+make lint      # Run linting and type checking
+make format    # Format code
+make build     # Build wheel for distribution
+make release   # Create and push release tag
+make clean     # Remove temporary files
 ```
 
-### From Source
-
-```bash
-git clone https://github.com/jewzaam/metrics-utility
-cd metrics-utility
-make requirements-dev
-make build
-pip install dist/metrics_utility-*.whl
-```
-
-### For Disconnected Environments
-
-Build the wheel file and copy it to your disconnected environment:
-
-```bash
-# On connected system
-make build
-
-# Copy dist/metrics_utility-*.whl to disconnected environment
-# On disconnected system
-pip install metrics_utility-*.whl
-```
-
-## 🎯 Quick Start
+## API
 
 ```python
 import metrics_utility
 
 # Start metrics HTTP server
-metrics_utility.metrics(8000)
+metrics_utility.metrics(port=8000)
 
-# Set a gauge value
+# Set a gauge
 metrics_utility.set("my_gauge", 42.0, {"service": "api"})
 
-# Increment a gauge
+# Add to a gauge
 metrics_utility.add("my_gauge", 10.0, {"service": "api"})
 
 # Increment a counter
 metrics_utility.inc("my_counter", {"service": "api"})
 
-# Decrement a counter
-metrics_utility.dec("my_counter", {"service": "api"})
+# Decrement (uses gauge, not counter)
+metrics_utility.dec("my_metric", {"service": "api"})
 ```
 
-## 📖 API Reference
 
-### Basic Metrics Functions
-
-#### `metrics(port: int)`
-Start the Prometheus HTTP metrics server on the specified port.
-
-```python
-metrics_utility.metrics(8000)
-```
-
-#### `set(name: str, value: float | None, labels: dict)`
-Set a gauge metric to a specific value. Pass `None` to remove the metric.
-
-```python
-metrics_utility.set("temperature", 72.5, {"location": "server_room"})
-metrics_utility.set("temperature", None, {"location": "server_room"})  # Remove
-```
-
-#### `add(name: str, value: float | None, labels: dict)`
-Add a value to a gauge metric (can be negative).
-
-```python
-metrics_utility.add("queue_size", 5.0, {"queue": "processing"})
-metrics_utility.add("queue_size", -2.0, {"queue": "processing"})
-```
-
-#### `inc(name: str, labels: dict)`
-Increment a counter metric by 1.
-
-```python
-metrics_utility.inc("requests_total", {"endpoint": "/api/v1"})
-```
-
-#### `dec(name: str, labels: dict)`
-Decrement a counter metric by 1.
-
-```python
-metrics_utility.dec("active_connections", {"service": "web"})
-```
-
-### File Watching Functions
-
-#### `watchFile(filename: str, frequency_seconds: float, callback: Callable)`
-Watch a file and call the callback for each new line.
-
-```python
-def process_line(filename: str, line: str) -> None:
-    print(f"New line in {filename}: {line}")
-
-metrics_utility.watchFile("/var/log/app.log", 1.0, process_line)
-```
-
-#### `watchDirectory(directory: str, regex: str, frequency_seconds: float, callback: Callable)`
-Watch a directory for the newest file matching regex and track new lines.
-
-```python
-def process_log_line(filename: str, line: str) -> None:
-    if "ERROR" in line:
-        metrics_utility.inc("log_errors", {"file": filename})
-
-metrics_utility.watchDirectory(
-    "/var/log/myapp/",
-    r"app-\d{4}-\d{2}-\d{2}\.log",
-    5.0,
-    process_log_line
-)
-```
-
-#### `findNewestFile(directory: str, regex: str) -> str | None`
-Find the newest file in a directory matching the regex pattern (modified in last 30 minutes).
-
-```python
-newest = metrics_utility.findNewestFile("/var/log/", r"app-.*\.log")
-```
-
-### Utility Functions
-
-#### `setDebug(enabled: bool)`
-Enable or disable debug logging.
-
-```python
-metrics_utility.setDebug(True)
-```
-
-#### `enrichLabels(labels: dict | None) -> dict | None`
-Automatically add host label to metrics. Called automatically by metric functions.
-
-```python
-labels = {"service": "api"}
-metrics_utility.enrichLabels(labels)
-# labels now includes {"service": "api", "host": "myserver"}
-```
-
-## 🏗️ Development
-
-### Setup Development Environment
-
-```bash
-# Clone the repository
-git clone https://github.com/jewzaam/metrics-utility
-cd metrics-utility
-
-# Set up development environment
-make requirements-dev
-```
-
-### Run Tests
-
-```bash
-make test              # Run all tests
-make test-unit         # Run unit tests only
-make test-integration  # Run integration tests only
-make coverage          # Run tests with coverage report
-```
-
-### Code Quality
-
-```bash
-make lint              # Run linting and type checking
-make format            # Format code with ruff
-```
-
-### Build Distribution
-
-```bash
-make build             # Build wheel and source distribution
-make build-wheel       # Build wheel only
-make install-local     # Install from local wheel
-```
-
-### Clean Up
-
-```bash
-make clean             # Remove temporary files and artifacts
-```
-
-## 📋 Complete Make Targets
-
-Run `make help` to see all available targets:
-
-### Environment Management
-- `make venv` - Create virtual environment
-- `make requirements` - Install runtime dependencies
-- `make requirements-dev` - Install development dependencies
-- `make clean` - Clean temporary files and artifacts
-
-### Development
-- `make format` - Format code with ruff
-- `make lint` - Run linting with ruff and mypy
-- `make test` - Run all tests
-- `make test-unit` - Run unit tests only
-- `make test-integration` - Run integration tests only
-- `make coverage` - Run tests with coverage threshold check
-- `make coverage-report` - Generate coverage report without threshold
-
-### Build & Distribution
-- `make build` - Build both wheel and source distribution
-- `make build-wheel` - Build wheel for disconnected environments
-- `make build-sdist` - Build source distribution
-- `make install-local` - Install from local wheel
-- `make uninstall` - Uninstall the package
-
-## 🔧 Configuration
-
-### Coverage Threshold
-
-The default coverage threshold is 80%. Override it:
-
-```bash
-make coverage COVERAGE_THRESHOLD=90
-```
-
-### Linting Configuration
-
-All linting and formatting configuration is in `pyproject.toml`. The project uses:
-
-- **ruff**: Fast Python linter and formatter
-- **mypy**: Static type checking
-- Line length: 88 characters
-- Python target: 3.10+
-
-## 📁 Project Structure
-
-```
-metrics-utility/
-├── src/
-│   └── metrics_utility/
-│       ├── __init__.py          # Package exports
-│       └── core.py              # Core functionality
-├── tests/
-│   ├── unit/                    # Unit tests
-│   └── integration/             # Integration tests
-├── make/                        # Modular Makefile components
-│   ├── common.mk                # Shared variables
-│   ├── env.mk                   # Environment setup
-│   ├── lint.mk                  # Linting & formatting
-│   ├── test.mk                  # Testing targets
-│   └── build.mk                 # Build & distribution
-├── .github/workflows/           # CI/CD workflows
-├── Makefile                     # Main build file
-├── pyproject.toml              # Project configuration
-├── requirements.txt            # Runtime dependencies
-└── requirements-dev.txt        # Development dependencies
-```
-
-## 🔄 Example: Complete Workflow
-
-```python
-import time
-import metrics_utility
-
-# Start metrics server
-metrics_utility.metrics(8000)
-
-# Set up initial metrics
-metrics_utility.set("app_status", 1.0, {"app": "myapp"})
-
-# Track requests
-for i in range(100):
-    metrics_utility.inc("requests_total", {"endpoint": "/api/v1"})
-    
-    # Update processing time
-    processing_time = 0.1 + (i * 0.001)
-    metrics_utility.set(
-        "request_duration_seconds",
-        processing_time,
-        {"endpoint": "/api/v1"}
-    )
-    
-    time.sleep(0.1)
-
-# Keep running to serve metrics
-while True:
-    time.sleep(1)
-```
-
-Visit `http://localhost:8000/metrics` to see your metrics in Prometheus format.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `make lint test coverage` to ensure quality
-5. Submit a pull request
-
-All commits should include:
-```
-Assisted-by: Cursor (Claude Sonnet 4.5)
-```
-
-## 📄 License
-
-See [LICENSE](LICENSE) file for details.
-
-## 🐛 Issues
-
-Report issues at: https://github.com/jewzaam/metrics-utility/issues
-
----
-
-**Built with modern Python tooling and best practices** 🎉
 

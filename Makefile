@@ -10,6 +10,7 @@ include make/env.mk
 include make/test.mk
 include make/lint.mk
 include make/build.mk
+include make/release.mk
 
 .DEFAULT_GOAL := help
 .PHONY: help
