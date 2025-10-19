@@ -14,19 +14,27 @@ venv: ## Create Python virtual environment
 		printf "$(GREEN)✅ pip installed$(RESET)\n"; \
 	fi
 
-uv: venv ## Install uv package manager
+uv: venv ## Install uv package manager (optional)
 	@if [ ! -f "$(VENV_DIR)/bin/uv" ]; then \
-		$(VENV_PIP) install uv; \
-		printf "$(GREEN)✅ uv installed$(RESET)\n"; \
+		$(VENV_PIP) install uv 2>/dev/null && printf "$(GREEN)✅ uv installed$(RESET)\n" || printf "$(YELLOW)⚠️  uv not available, will use pip$(RESET)\n"; \
 	fi
 
 requirements: venv uv ## Install all dependencies (runtime)
-	@$(VENV_UV) pip install --upgrade pip >/dev/null
-	@$(VENV_UV) pip install -r requirements.txt
+	@if [ -f "$(VENV_UV)" ]; then \
+		$(VENV_UV) pip install --upgrade pip >/dev/null; \
+		$(VENV_UV) pip install -r requirements.txt; \
+	else \
+		$(VENV_PIP) install --upgrade pip --quiet; \
+		$(VENV_PIP) install -r requirements.txt; \
+	fi
 	@echo "✅ All dependencies installed in $(VENV_DIR)"
 
 requirements-dev: venv uv requirements ## Install all dev dependencies
-	@$(VENV_UV) pip install -r requirements-dev.txt
+	@if [ -f "$(VENV_UV)" ]; then \
+		$(VENV_UV) pip install -r requirements-dev.txt; \
+	else \
+		$(VENV_PIP) install -r requirements-dev.txt; \
+	fi
 	@echo "✅ All dev dependencies installed in $(VENV_DIR)"
 
 clean: ## Remove temporary and backup files

@@ -5,7 +5,11 @@
 .PHONY: lint format
 
 lint: requirements-dev ## Run linting and type checking
-	@$(VENV_UV) pip install -e . --quiet
+	@if [ -f "$(VENV_UV)" ]; then \
+		$(VENV_UV) pip install -e . --quiet; \
+	else \
+		$(VENV_PIP) install -e . --quiet; \
+	fi
 	@$(VENV_PYTHON) -m ruff check src/ tests/
 	@$(VENV_PYTHON) -m mypy src/
 	@printf "$(GREEN)✅ Linting complete$(RESET)\n"

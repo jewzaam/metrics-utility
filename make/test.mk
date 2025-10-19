@@ -2,15 +2,23 @@
 # Test Targets
 # =============
 
-.PHONY: test coverage coverage-report coverage-verify
+.PHONY: test coverage coverage-report coverage-verify test-py37 clean-py37
 
 test: requirements-dev ## Run all tests
-	@$(VENV_UV) pip install -e . --quiet
+	@if [ -f "$(VENV_UV)" ]; then \
+		$(VENV_UV) pip install -e . --quiet; \
+	else \
+		$(VENV_PIP) install -e . --quiet; \
+	fi
 	@$(VENV_PYTHON) -m pytest tests/ -v $(ARGS)
 	@printf "$(GREEN)✅ Tests completed$(RESET)\n"
 
 coverage-report: requirements-dev ## Generate coverage report without failing
-	@$(VENV_UV) pip install -e . --quiet
+	@if [ -f "$(VENV_UV)" ]; then \
+		$(VENV_UV) pip install -e . --quiet; \
+	else \
+		$(VENV_PIP) install -e . --quiet; \
+	fi
 	@$(VENV_PYTHON) -m pytest tests/ --cov=src --cov-report=html --cov-report=term --cov-report=xml $(ARGS)
 	@$(VENV_PYTHON) -m coverage report | tail -1 | awk '{print $$4}' | sed 's/%//' > .coverage-percentage
 	@printf "$(GREEN)✅ Coverage report generated$(RESET)\n"
@@ -30,4 +38,3 @@ coverage-verify: ## Verify coverage meets threshold
 	fi
 
 coverage: coverage-report coverage-verify ## Run tests with coverage and verify threshold
-
